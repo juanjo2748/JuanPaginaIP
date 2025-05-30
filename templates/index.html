@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de IPs</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Estilos personalizados -->
+    <style>
+        .binary-display {
+            font-family: monospace;
+            font-size: 1.1rem;
+            letter-spacing: 1px;
+            word-break: break-all;
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .network-part {
+            color: #ff0000; 
+            font-weight: bold;
+        }
+        .host-part {
+            color: #28a745; 
+        }
+        .form-container {
+            max-width: 600px;
+        }
+        .card {
+            border: 1px solid #dee2e6;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .custom-header {
+            background-color:  #06879e !important;
+            color: white !important;
+            border-bottom: none;
+        }
+        .info-header {
+            background-color: #00a8a8 !important;
+            color: white !important;
+        }
+        .btn-custom {
+        background-color: #007575; 
+        border-color: #007575;
+        color: white;
+        }
+        .btn-custom:hover {
+            background-color: #007575; 
+            border-color: #007575;
+        }
+        .nav-button {
+            background-color: #6c757d;
+            border-color: #6c757d;
+            color: white;
+        }
+        .nav-button:hover {
+            background-color: #5a6268;
+            border-color: #545b62;
+            color: white;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow-sm">
+                    <div class="card-header custom-header d-flex justify-content-between align-items-center">
+                        <h1 class="h4 mb-0">Calculadora de IPv4</h1>
+                        <a href="/presentacion" class="btn nav-button btn-sm">
+                            <i class="fas fa-info-circle me-1"></i>Presentación
+                        </a>
+                    </div>
+                    <div class="card-body">
+                        <form method="POST" class="mb-4">
+                            <div class="row g-3">
+                                <div class="col-md-8">
+                                    <label for="ip" class="form-label">Dirección IP:</label>
+                                    <input type="text" class="form-control" id="ip" name="ip" 
+                                           placeholder="Ej: 192.168.1.1" 
+                                           value="{{ request.form.ip if request.method == 'POST' else '' }}" 
+                                           required>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="mascara" class="form-label">Máscara:</label>
+                                    <input type="text" class="form-control" id="mascara" name="mascara" 
+                                           placeholder="Ej: 24" 
+                                           value="{{ request.form.mascara if request.method == 'POST' else '' }}" 
+                                           required>
+                                </div>
+                                <div class="col-12">
+                                    <button type="submit" class="btn btn-custom w-100">Calcular</button>
+                                </div>
+                            </div>
+                        </form>
+
+                        {% if resultado %}
+                            {% if resultado.error %}
+                                <div class="alert alert-danger">{{ resultado.error }}</div>
+                            {% else %}
+                                <div class="results-container">
+                                    <h2 class="h5 mb-3 text-center">Resultados para {{ resultado.ip }}/{{ resultado.mascara }}</h2>
+                                    
+                                    <div class="row row-cols-1 row-cols-md-2 g-4 mb-4">
+                                        <div class="col">
+                                            <div class="card h-100">
+                                                <div class="card-header info-header">Información Básica</div>
+                                                <div class="card-body">
+                                                    <ul class="list-group list-group-flush">
+                                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                            <span>IP de Red:</span>
+                                                            <span class="fw-bold">{{ resultado.ip_red }}</span>
+                                                        </li>
+                                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                            <span>IP de Broadcast:</span>
+                                                            <span class="fw-bold">{{ resultado.ip_broadcast }}</span>
+                                                        </li>
+                                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                            <span>Cantidad de IPs útiles:</span>
+                                                            <span class="fw-bold">{{ resultado.cantidad_ips_utiles }}</span>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col">
+                                            <div class="card h-100">
+                                                <div class="card-header info-header">Clasificación</div>
+                                                <div class="card-body">
+                                                    <ul class="list-group list-group-flush">
+                                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                            <span>Clase de IP:</span>
+                                                            <span class="fw-bold">{{ resultado.clase_ip }}</span>
+                                                        </li>
+                                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                            <span>Tipo de IP:</span>
+                                                            <span class="fw-bold">{{ resultado.tipo_ip }}</span>
+                                                        </li>
+                                                        <li class="list-group-item">
+                                                            <span>Rango de IPs útiles:</span>
+                                                            <div class="mt-2 text-center">
+                                                                <span class="fw-bold">{{ resultado.rango_ips }}</span>
+                                                            </div>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="card">
+                                        <div class="card-header info-header">Representación Binaria</div>
+                                        <div class="card-body">
+                                            <div class="binary-display mb-2">
+                                                <span class="network-part">{{ resultado.binario[:resultado.mascara] }}</span>
+                                                {% if resultado.mascara < 32 %}
+                                                    <span class="host-part">{{ resultado.binario[resultado.mascara:] }}</span>
+                                                {% endif %}
+                                            </div>
+                                            <div class="d-flex justify-content-between">
+                                                <span class="network-part">(Parte de Red - {{ resultado.mascara }} bits)</span>
+                                                {% if resultado.mascara < 32 %}
+                                                    <span class="host-part">(Parte de Host - {{ 32 - resultado.mascara }} bits)</span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                    <div class="card-footer text-muted text-center small">
+                        Calculadora de IPs - Redes de Datos
+                    </div>
+                    <div class="card-footer text-muted text-center small">
+                        Juan Jose Yañez Sarmiento
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

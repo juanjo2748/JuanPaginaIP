@@ -1,0 +1,25 @@
+CALCULADORA DE IP - INSTALACIÓN EN ROCKY LINUX 9
+
+1. Requisitos previos:
+   - Rocky Linux 9 con Python 3.9+
+   - Acceso root/sudo
+
+2. Pasos de instalación:
+   a) Copiar la carpeta al servidor:
+      scp -r calculadora_ip/ usuario@servidor:/ruta/destino
+
+   b) Instalar dependencias:
+      sudo dnf install -y python3 python3-pip firewalld
+      pip3 install -r requirements.txt
+
+   c) Configurar firewall:
+      sudo firewall-cmd --add-port=80/tcp --permanent
+      sudo firewall-cmd --reload
+
+   d) Ejecutar la aplicación:
+      cd calculadora_ip
+      sudo python3 app.py
+
+3. Acceso:
+   - Abrir navegador en: http://<ip-del-servidor>/
+
